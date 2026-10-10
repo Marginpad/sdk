@@ -139,6 +139,12 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: python/dist
+          # PyPI NEVER allows a version to be re-uploaded, so without this a re-run of a release whose
+          # OTHER half failed can never go green: 3.0.0 published here and npm refused it in the same
+          # run (the provenance carries the canonical Marginpad/sdk and package.json said marginpad/sdk).
+          # Skipping an upload that is already there is what makes one tag re-runnable; the version check
+          # above and the install-and-print verification below are what stop it hiding a real mistake.
+          skip-existing: true
       - name: Install from PyPI in a clean venv and print its version
         if: github.event_name == 'push' || inputs.dry_run == false
         run: |
